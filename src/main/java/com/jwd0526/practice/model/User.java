@@ -1,6 +1,12 @@
-package com.jwd0526.practice;
+package com.jwd0526.practice.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "users")
 public class User {
+
+    @Id
     private int id;
     private String name;
     private String email;

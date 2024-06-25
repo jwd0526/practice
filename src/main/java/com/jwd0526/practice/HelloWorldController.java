@@ -1,8 +1,6 @@
 package com.jwd0526.practice;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
+import com.jwd0526.practice.model.User;
+import com.jwd0526.practice.repository.UserRepository;
 
 @RestController
 public class HelloWorldController {
@@ -23,6 +23,9 @@ public class HelloWorldController {
     @Autowired
     private Gson gson;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping(path = "/hello")
     public String helloWorld() {
         return "Hello, World!";
@@ -30,10 +33,7 @@ public class HelloWorldController {
 
     @GetMapping(path = "/users")
     public ResponseEntity<String> userJson() {
-        User[] users = getUsers();
-        if (users == null) {
-            return new ResponseEntity<>("[]", HttpStatus.OK);
-        }
+        List<User> users = getUsers();
         String json = gson.toJson(users);
 
         HttpHeaders headers = new HttpHeaders();
@@ -42,13 +42,12 @@ public class HelloWorldController {
         return new ResponseEntity<>(json, headers, HttpStatus.OK);
     }
 
-    private User[] getUsers() {
-        try (Reader reader = new FileReader("src/main/resources/Users.json")) {
-            User[] users = gson.fromJson(reader, User[].class);
-            return users;
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Failed to read the Users.json file: {0}", e.getMessage());
+    private List<User> getUsers() {
+        try {
+            return userRepository.findAll();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to fetch users from database: {0}", e.getMessage());
+            return null;
         }
-        return null;
     }
 }
